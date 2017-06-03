@@ -36,23 +36,25 @@ func main() {
 		switch cmd {
 		case getCmd:
 			success = app.Get()
+			if success {
+				app.PrintTable()
+			}
 		case addCmd:
 			success = app.Add()
 			if success {
 				app.PrintTable()
+				break
 			}
 		case delCmd:
 			success = app.Delete()
 			if success {
 				app.PrintTable()
+				break
 			}
 		default:
 			panic("illegal command")
 		}
 
-		if success {
-			break
-		}
 	}
 }
 
