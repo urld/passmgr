@@ -89,7 +89,7 @@ func mainList(filename string, action actionType) {
 		os.Exit(1)
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.StripEscape)
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', tabwriter.StripEscape)
 	fmt.Fprintf(w, "n)\t%s\t%s\n", "User", "Description")
 	for i, c := range subjects {
 		fmt.Fprintf(w, "%d)\t%s\t%s\n", i+1, c.User, c.Description)
