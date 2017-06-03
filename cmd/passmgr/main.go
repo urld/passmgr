@@ -17,6 +17,13 @@ import (
 	"github.com/urld/passmgr"
 )
 
+type actionType int
+
+const (
+	actionGet actionType = iota
+	actionDel
+)
+
 func main() {
 	user, err := user.Current()
 	if err != nil {
@@ -25,13 +32,16 @@ func main() {
 	defaultFilename := filepath.Join(user.HomeDir, ".passmgr_store")
 
 	add := flag.Bool("add", false, "store a new set of credentials")
+	del := flag.Bool("del", false, "delete a set of credentials")
 	filename := flag.String("file", defaultFilename, "specify the passmgr store file")
 	flag.Parse()
 
 	if *add {
 		mainAdd(calcFilename(*filename))
+	} else if *del {
+		mainList(calcFilename(*filename), actionDel)
 	} else {
-		mainGet(calcFilename(*filename))
+		mainList(calcFilename(*filename), actionGet)
 	}
 }
 
@@ -60,7 +70,7 @@ func mainAdd(filename string) {
 
 }
 
-func mainGet(filename string) {
+func mainList(filename string, action actionType) {
 	if !isFile(filename) {
 		fmt.Fprintln(os.Stderr, "The passmgr store does not exist yet. You need to add some passphrases first.\nSee passmgr -h for help.")
 		os.Exit(1)
@@ -86,9 +96,19 @@ func mainGet(filename string) {
 	}
 	_ = w.Flush()
 
+	var actionPrompt string
+	switch action {
+	case actionGet:
+		actionPrompt = "Select: "
+	case actionDel:
+		actionPrompt = "Delete: "
+	default:
+		panic("unknown action")
+	}
+
 	// try to select entry
 	for {
-		idx, err := strconv.Atoi(ask("Select: "))
+		idx, err := strconv.Atoi(ask(actionPrompt))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "Please insert a valid number.")
 			continue
@@ -97,17 +117,28 @@ func mainGet(filename string) {
 			fmt.Fprintf(os.Stderr, "Please insert a number within this range: %d-%d\n", 1, len(subjects))
 			continue
 		}
-
-		subject, _ := fileStore.Load(subjects[idx-1])
-		passphrase, ok := subject.Secrets[passphraseKey]
-		if !ok {
-			continue
+		switch action {
+		case actionGet:
+			subject, _ := fileStore.Load(subjects[idx-1])
+			passphrase, ok := subject.Secrets[passphraseKey]
+			if !ok {
+				continue
+			}
+			fmt.Println("passphrase copied to clipboard...")
+			setClipboard(passphrase)
+			time.Sleep(5 * time.Second)
+			resetClipboard()
+			fmt.Println("passphrase erased from clipboard")
+		case actionDel:
+			fileStore.Delete(subjects[idx-1])
+			err = passmgr.WriteFileStore(fileStore)
+			if err != nil {
+				quitErr(err)
+			}
+		default:
+			panic("unknown action")
 		}
-		fmt.Println("passphrase copied to clipboard...")
-		setClipboard(passphrase)
-		time.Sleep(5 * time.Second)
-		resetClipboard()
-		fmt.Println("passphrase erased from clipboard")
+
 		break
 	}
 

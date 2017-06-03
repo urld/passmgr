@@ -47,6 +47,16 @@ func (s *fileStore) Store(newSubject Subject) {
 	s.subjects = append(s.subjects, newSubject)
 }
 
+func (s *fileStore) Delete(subject Subject) bool {
+	for i, c := range s.subjects {
+		if c.Description == subject.Description && c.User == subject.User {
+			s.subjects = append(s.subjects[:i], s.subjects[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
+
 func (s *fileStore) Persist() error {
 	content, err := marshalStore(s.subjects)
 	if err != nil {

@@ -7,8 +7,9 @@ package passmgr
 // Store provides access to stored Credentials.
 type Store interface {
 	List() []Subject
-	Store(c Subject)
-	Load(c Subject) (Subject, bool)
+	Store(Subject)
+	Load(Subject) (Subject, bool)
+	Delete(Subject) bool
 }
 
 // Subject represents contain information on various secrets for
