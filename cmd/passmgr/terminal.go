@@ -17,18 +17,18 @@ import (
 	"github.com/urld/passmgr"
 )
 
-// TermApp provides means to interact with a passmgr store via terminal.
-type TermApp struct {
+// termApp provides means to interact with a passmgr store via terminal.
+type termApp struct {
 	filename string
 	store    passmgr.Store
 	subjects []passmgr.Subject
 }
 
-func NewPassmgrTerm(filename string) TermApp {
-	return TermApp{filename: filename}
+func newTermApp(filename string) termApp {
+	return termApp{filename: filename}
 }
 
-func (app *TermApp) Init() {
+func (app *termApp) Init() {
 	if !isFile(app.filename) {
 		fmt.Fprintln(os.Stderr, "The passmgr store does not exist yet. Add some passphrases first.")
 		fmt.Fprintln(os.Stderr, "See passmgr -h for help.")
@@ -44,7 +44,7 @@ func (app *TermApp) Init() {
 	app.subjects = store.List()
 }
 
-func (app *TermApp) InitEmpty() {
+func (app *termApp) InitEmpty() {
 	masterPassphrase := askSecret("[passmgr] new master passphrase for %s: ", app.filename)
 	if masterPassphrase != askSecret("[passmgr] retype master passphrase for %s: ", app.filename) {
 		quitErr(fmt.Errorf("error: passphrases did not match"))
@@ -62,7 +62,7 @@ func (app *TermApp) InitEmpty() {
 	}
 }
 
-func (app *TermApp) PrintTable() {
+func (app *termApp) PrintTable() {
 	app.subjects = app.store.List()
 	if len(app.subjects) == 0 {
 		fmt.Println("\n-- store is empty --\n")
@@ -81,7 +81,7 @@ func (app *TermApp) PrintTable() {
 
 const passphraseKey = "passphrase"
 
-func (app *TermApp) Add() bool {
+func (app *termApp) Add() bool {
 	var subject passmgr.Subject
 	subject.Description = ask("Description: ")
 	subject.User = ask("User: ")
@@ -96,7 +96,7 @@ func (app *TermApp) Add() bool {
 	return true
 }
 
-func (app *TermApp) Get() bool {
+func (app *termApp) Get() bool {
 	if len(app.subjects) == 0 {
 		return true
 	}
@@ -125,7 +125,7 @@ func (app *TermApp) Get() bool {
 	return true
 }
 
-func (app *TermApp) Delete() bool {
+func (app *termApp) Delete() bool {
 	if len(app.subjects) == 0 {
 		return true
 	}
@@ -147,7 +147,7 @@ func (app *TermApp) Delete() bool {
 	return true
 }
 
-func (app *TermApp) readSelection(prompt string) (int, bool) {
+func (app *termApp) readSelection(prompt string) (int, bool) {
 	idx, err := strconv.Atoi(ask("Select: "))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Please type a valid number.")

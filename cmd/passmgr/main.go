@@ -22,7 +22,7 @@ func main() {
 	cmd, filename := parseCmd()
 
 	// setup:
-	app := NewPassmgrTerm(filename)
+	app := newTermApp(filename)
 	if isFile(filename) {
 		app.Init()
 	} else {
@@ -66,9 +66,9 @@ func parseCmd() (command, string) {
 	defaultFilename := filepath.Join(user.HomeDir, ".passmgr_store")
 
 	// cmd parsing:
-	add := flag.Bool("add", false, "store a new set of credentials")
-	del := flag.Bool("del", false, "delete a set of credentials")
-	filename := flag.String("file", defaultFilename, "specify the passmgr store file")
+	add := flag.Bool("add", false, "store new credentials")
+	del := flag.Bool("del", false, "delete stored credentials")
+	filename := flag.String("file", defaultFilename, "specify the passmgr store")
 	flag.Parse()
 
 	cmd := getCmd

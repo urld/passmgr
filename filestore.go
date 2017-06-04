@@ -72,9 +72,11 @@ func (s *fileStore) Persist() error {
 
 // ReadFileStore reads and decrypts the encrypted contents of a Store from the
 // specified file.
-// The file consists of a fixed size salt, followed by a ciphertext of
-// arbitrary length. The salt is required to derive a encryption key from
-// the master passphrase.
+//
+// The file consists of a fixed size salt (32 bytes), followed by a ciphertext
+// of arbitrary length. The salt is used for key derivation for the ciphertext.
+// The ciphertext is AES256-GCM encrypted and starts with a random nonce with
+// the standard size defined in the crypto package (currently 12 bytes).
 func ReadFileStore(filename, passphrase string) (Store, error) {
 	content, err := readSecretFile(filename)
 	if err != nil {

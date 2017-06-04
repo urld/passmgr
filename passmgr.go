@@ -2,18 +2,33 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package passmgr implements a secure store for credentials.
 package passmgr
 
-// Store provides access to stored Credentials.
+// Store provides access to stored credentials.
 type Store interface {
+
+	// List retrieves a list of all Subjects known to the store.
+	// The Secrets map of the returned Subjects is empty. To retrieve the
+	// complete Subject including its secrets, the Load method needs to be
+	// used.
 	List() []Subject
+
+	// Load looks up a Subject, identified by its User and Description
+	// fields. It returns the complete Subject including its secrets and
+	// a flag indicating the whether the lookup was successful or not.
+	Load(Subject) (s Subject, ok bool)
+
+	// Store adds a new Subject to the store, or updates an existing one.
 	Store(Subject)
-	Load(Subject) (Subject, bool)
+
+	// Delete removes a subject from the store. It returns false if the
+	// Subject to delete could not be found.
 	Delete(Subject) bool
 }
 
-// Subject represents contain information on various secrets for
-// a given user name.
+// Subject contains various secrets for a given user name.
+// Usually the Description and User fields are used as unique identifiers.
 type Subject struct {
 	Description string
 	User        string
