@@ -5,8 +5,10 @@
 package passmgr
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -23,14 +25,14 @@ type fileStore struct {
 func (s *fileStore) List() []Subject {
 	l := make([]Subject, len(s.subjects))
 	for i, c := range s.subjects {
-		l[i] = Subject{Description: c.Description, User: c.User}
+		l[i] = Subject{URL: c.URL, User: c.User}
 	}
 	return l
 }
 
 func (s *fileStore) Load(subject Subject) (Subject, bool) {
 	for _, sc := range s.subjects {
-		if sc.Description == subject.Description && sc.User == subject.User {
+		if sc.URL == subject.URL && sc.User == subject.User {
 			return sc, true
 		}
 	}
@@ -39,7 +41,7 @@ func (s *fileStore) Load(subject Subject) (Subject, bool) {
 
 func (s *fileStore) Store(newSubject Subject) {
 	for i, c := range s.subjects {
-		if c.Description == newSubject.Description && c.User == newSubject.User {
+		if c.URL == newSubject.URL && c.User == newSubject.User {
 			s.subjects[i] = newSubject
 			return
 		}
@@ -49,7 +51,7 @@ func (s *fileStore) Store(newSubject Subject) {
 
 func (s *fileStore) Delete(subject Subject) bool {
 	for i, c := range s.subjects {
-		if c.Description == subject.Description && c.User == subject.User {
+		if c.URL == subject.URL && c.User == subject.User {
 			s.subjects = append(s.subjects[:i], s.subjects[i+1:]...)
 			return true
 		}
@@ -67,33 +69,54 @@ func (s *fileStore) Persist() error {
 		return err
 	}
 	content = append(s.salt, content...)
+	content = append(magicnumberV1, content...)
 	return ioutil.WriteFile(s.filename, content, os.FileMode(0600))
 }
+
+// magic number to detect the version of the file format.
+var magicnumberV1 = []byte{0x70, 0x61, 0x73, 0x73, 0x6d, 0x67, 0x72, 0x01} // passmgr1
+const (
+	saltLenV1  = 32
+	nonceLenV1 = 12
+)
 
 // ReadFileStore reads and decrypts the encrypted contents of a Store from the
 // specified file.
 //
-// The file consists of a fixed size salt (32 bytes), followed by a ciphertext
-// of arbitrary length. The salt is used for key derivation for the ciphertext.
-// The ciphertext is AES256-GCM encrypted and starts with a random nonce with
-// the standard size defined in the crypto package (currently 12 bytes).
+// The file starts with a magic number to identify the file format version.
+// Currently only the format 'passmgr1' is supported.
+//
+//    0      7 8                             39 40        51 52           n
+//   +--------+--------------------------------+------------+-----    -----+
+//   |passmgr1|              salt              |   nonce    |  ciphertext  |
+//   +--------+--------------------------------+------------+-----    -----+
+//
+//   passmgr1:   70 61 73 73 6d 67 72 01
+//   salt:       32 byte salt for scrypt key derivation
+//   nonce:      12 byte random nonce for aes-gcm
+//   ciphertext: aes256-gcm encrypted json encoded content of Store
 func ReadFileStore(filename, passphrase string) (Store, error) {
 	content, err := readSecretFile(filename)
 	if err != nil {
 		return nil, err
 	}
+	if !bytes.HasPrefix(content, magicnumberV1) {
+		return nil, fmt.Errorf("unknown file type")
+	}
+	magicnumberLen := len(magicnumberV1)
 
-	salt := content[:saltLen]
+	content = content[magicnumberLen:]
+	salt := content[:saltLenV1]
 	key, err := deriveKey([]byte(passphrase), salt)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(content) == saltLen {
+	if len(content) == saltLenV1 {
 		return &fileStore{filename: filename, salt: salt, key: key}, nil
 	}
 
-	ciphertext := content[saltLen:]
+	ciphertext := content[saltLenV1:]
 	plaintext, err := decrypt(key, ciphertext)
 	if err != nil {
 		return nil, err
@@ -114,7 +137,8 @@ func WriteFileStore(store Store) error {
 func readSecretFile(filename string) ([]byte, error) {
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {
-		return genSalt()
+		salt, err := genSalt()
+		return append(magicnumberV1, salt...), err
 	}
 	if err != nil {
 		return nil, err

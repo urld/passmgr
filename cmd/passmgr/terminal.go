@@ -73,9 +73,9 @@ func (app *termApp) PrintTable() {
 
 	fmt.Println("")
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', tabwriter.StripEscape)
-	fmt.Fprintf(w, "n)\t%s\t%s\n", "User", "Description")
+	fmt.Fprintf(w, "n)\t%s\t%s\n", "User", "URL")
 	for i, c := range app.subjects {
-		fmt.Fprintf(w, "%d)\t%s\t%s\n", i+1, c.User, c.Description)
+		fmt.Fprintf(w, "%d)\t%s\t%s\n", i+1, c.User, c.URL)
 	}
 	_ = w.Flush()
 	fmt.Println("")
@@ -85,9 +85,9 @@ const passphraseKey = "passphrase"
 
 func (app *termApp) Add() bool {
 	var subject passmgr.Subject
-	fmt.Println("Enter the new values for the entry")
+	fmt.Println("Enter the values for the new entry")
 	subject.User = ask("\tUser: ")
-	subject.Description = ask("\tDescription: ")
+	subject.URL = ask("\tURL: ")
 	subject.Secrets = make(map[string]string)
 	subject.Secrets[passphraseKey] = askSecret("\tPassphrase: ")
 
@@ -141,7 +141,7 @@ func (app *termApp) Delete() bool {
 		return false
 	}
 	subject := app.subjects[idx-1]
-	if !askConfirm("Delete all secrets for '%s | %s?", subject.User, subject.Description) {
+	if !askConfirm("Delete all secrets for '%s | %s?", subject.User, subject.URL) {
 		return true
 	}
 

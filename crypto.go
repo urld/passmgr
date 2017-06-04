@@ -14,11 +14,9 @@ import (
 	"golang.org/x/crypto/scrypt"
 )
 
-const saltLen = 32
-
 func genSalt() ([]byte, error) {
 
-	salt := make([]byte, saltLen)
+	salt := make([]byte, saltLenV1)
 	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
 		return nil, err
 	}
@@ -36,7 +34,7 @@ func newGCM(key []byte) (cipher.AEAD, error) {
 	if err != nil {
 		return nil, err
 	}
-	return cipher.NewGCM(block)
+	return cipher.NewGCMWithNonceSize(block, nonceLenV1)
 }
 
 func encrypt(key []byte, plaintext []byte) ([]byte, error) {

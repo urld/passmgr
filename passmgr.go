@@ -28,9 +28,9 @@ type Store interface {
 }
 
 // Subject contains various secrets for a given user name.
-// Usually the Description and User fields are used as unique identifiers.
+// Usually the URL and User fields are used as unique identifiers.
 type Subject struct {
-	Description string
-	User        string
-	Secrets     map[string]string
+	User    string
+	URL     string
+	Secrets map[string]string
 }
