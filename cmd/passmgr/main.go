@@ -28,34 +28,7 @@ func main() {
 	} else {
 		app.InitEmpty()
 	}
-
-	// main loop:
-	app.PrintTable()
-	success := false
-	for {
-		switch cmd {
-		case getCmd:
-			success = app.Get()
-			if success {
-				app.PrintTable()
-			}
-		case addCmd:
-			success = app.Add()
-			if success {
-				app.PrintTable()
-				break
-			}
-		case delCmd:
-			success = app.Delete()
-			if success {
-				app.PrintTable()
-				break
-			}
-		default:
-			panic("illegal command")
-		}
-
-	}
+	loop(app, cmd)
 }
 
 func parseCmd() (command, string) {
@@ -78,4 +51,39 @@ func parseCmd() (command, string) {
 		cmd = delCmd
 	}
 	return cmd, calcFilename(*filename)
+}
+
+func loop(app termApp, cmd command) {
+	app.PrintTable()
+	success := false
+	for {
+		switch cmd {
+		case getCmd:
+			success = app.Get()
+			if success {
+				if askConfirm("Quit?") {
+					return
+				}
+				app.PrintTable()
+			}
+		case addCmd:
+			success = app.Add()
+			if success {
+				app.PrintTable()
+				if askConfirm("Quit?") {
+					return
+				}
+			}
+		case delCmd:
+			success = app.Delete()
+			if success {
+				app.PrintTable()
+				if askConfirm("Quit?") {
+					return
+				}
+			}
+		default:
+			panic("illegal command")
+		}
+	}
 }

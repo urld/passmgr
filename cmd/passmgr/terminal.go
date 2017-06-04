@@ -65,7 +65,9 @@ func (app *termApp) InitEmpty() {
 func (app *termApp) PrintTable() {
 	app.subjects = app.store.List()
 	if len(app.subjects) == 0 {
-		fmt.Println("\n-- store is empty --\n")
+		fmt.Println("")
+		fmt.Println("-- store is empty --")
+		fmt.Println("")
 		return
 	}
 
@@ -83,10 +85,11 @@ const passphraseKey = "passphrase"
 
 func (app *termApp) Add() bool {
 	var subject passmgr.Subject
-	subject.Description = ask("Description: ")
-	subject.User = ask("User: ")
+	fmt.Println("Enter the new values for the entry")
+	subject.User = ask("\tUser: ")
+	subject.Description = ask("\tDescription: ")
 	subject.Secrets = make(map[string]string)
-	subject.Secrets[passphraseKey] = askSecret("Passphrase: ")
+	subject.Secrets[passphraseKey] = askSecret("\tPassphrase: ")
 
 	app.store.Store(subject)
 	err := passmgr.WriteFileStore(app.store)
@@ -114,7 +117,10 @@ func (app *termApp) Get() bool {
 		return false
 	}
 
-	fmt.Println("\nPassphrase copied to clipboard!\nClipboard will be erased in 6 seconds.\n")
+	fmt.Println("")
+	fmt.Println("Passphrase copied to clipboard!")
+	fmt.Println("Clipboard will be erased in 6 seconds.")
+	fmt.Println("")
 	setClipboard(passphrase)
 	for i := 1; i <= 6; i++ {
 		time.Sleep(1 * time.Second)
@@ -130,12 +136,12 @@ func (app *termApp) Delete() bool {
 		return true
 	}
 
-	idx, ok := app.readSelection("Select: ")
+	idx, ok := app.readSelection("Delete: ")
 	if !ok {
 		return false
 	}
-	fmt.Printf("All secrets of '%s | %s' will be deleted.\n", app.subjects[idx-1].User, app.subjects[idx-1].Description)
-	if !askConfirm("Do you want to continue ?") {
+	subject := app.subjects[idx-1]
+	if !askConfirm("Delete all secrets for '%s | %s?", subject.User, subject.Description) {
 		return true
 	}
 
@@ -148,7 +154,7 @@ func (app *termApp) Delete() bool {
 }
 
 func (app *termApp) readSelection(prompt string) (int, bool) {
-	idx, err := strconv.Atoi(ask("Select: "))
+	idx, err := strconv.Atoi(ask(prompt))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Please type a valid number.")
 		return 0, false
@@ -160,8 +166,8 @@ func (app *termApp) readSelection(prompt string) (int, bool) {
 	return idx, true
 }
 
-func askConfirm(prompt string) bool {
-	switch strings.ToLower(ask(prompt + " [Y/n] ")) {
+func askConfirm(prompt string, a ...interface{}) bool {
+	switch strings.ToLower(ask(prompt+" [Y/n] ", a...)) {
 	case "y":
 		return true
 	case "":
