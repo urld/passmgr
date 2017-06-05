@@ -6,8 +6,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"os"
 	"os/user"
 	"path/filepath"
+	"time"
 )
 
 type command int
@@ -57,6 +60,10 @@ func loop(app termApp, cmd command) {
 	app.PrintTable()
 	success := false
 	for {
+		timer := time.AfterFunc(1*time.Minute, func() {
+			fmt.Println("\n[passmgr] Exited due to inactivity.")
+			os.Exit(1)
+		})
 		switch cmd {
 		case getCmd:
 			success = app.Get()
@@ -85,5 +92,6 @@ func loop(app termApp, cmd command) {
 		default:
 			panic("illegal command")
 		}
+		timer.Stop()
 	}
 }
