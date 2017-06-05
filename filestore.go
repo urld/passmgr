@@ -1,4 +1,4 @@
-// Copyright (c) 2016, David Url
+// Copyright (c) 2017, David Url
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -7,7 +7,6 @@ package passmgr
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -135,16 +134,13 @@ func WriteFileStore(store Store) error {
 }
 
 func readSecretFile(filename string) ([]byte, error) {
-	info, err := os.Stat(filename)
+	_, err := os.Stat(filename)
 	if os.IsNotExist(err) {
 		salt, err := genSalt()
 		return append(magicnumberV1, salt...), err
 	}
 	if err != nil {
 		return nil, err
-	}
-	if info.Mode().Perm() != 0600 {
-		return nil, errors.New("passmgr store file must have permissions set to 0600")
 	}
 	return ioutil.ReadFile(filename)
 }
