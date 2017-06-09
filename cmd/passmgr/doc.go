@@ -22,7 +22,7 @@ Example:
   $ passmgr
   [passmgr] master passphrase for /home/david/.passmgr_store:
 
-  n)   User                Description
+  n)   User                URL
   1)   urld                github.com
   2)   david@example.com   facebook.com
   3)   david@example.com   twitter.com

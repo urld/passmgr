@@ -14,9 +14,9 @@ type Store interface {
 	// used.
 	List() []Subject
 
-	// Load looks up a Subject, identified by its User and Description
-	// fields. It returns the complete Subject including its secrets and
-	// a flag indicating the whether the lookup was successful or not.
+	// Load looks up a Subject, identified by its User and URL fields.
+	// It returns the complete Subject including its secrets and a flag
+	// indicating whether the lookup was successful or not.
 	Load(Subject) (s Subject, ok bool)
 
 	// Store adds a new Subject to the store, or updates an existing one.
