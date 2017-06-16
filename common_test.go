@@ -1,0 +1,25 @@
+// Copyright (c) 2017, David Url
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+package passmgr
+
+import (
+	"bytes"
+	"fmt"
+	"testing"
+)
+
+func assertEqual(t *testing.T, a, b interface{}, message string) {
+	switch a.(type) {
+	case []byte:
+		if bytes.Equal(a.([]byte), b.([]byte)) {
+			return
+		}
+	default:
+		if a == b {
+			return
+		}
+	}
+	msg := fmt.Sprintf("%s: %v != %v", message, a, b)
+	t.Error(msg)
+}

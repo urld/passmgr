@@ -4,7 +4,6 @@
 package passmgr
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"testing"
@@ -32,14 +31,6 @@ func getTestFile(name string) string {
 		panic(err)
 	}
 	return testFile.Name()
-}
-
-func assertEqual(t *testing.T, a, b interface{}, message string) {
-	if a == b {
-		return
-	}
-	msg := fmt.Sprintf("%s: %v != %v", message, a, b)
-	t.Error(msg)
 }
 
 func TestNewStoreIsEmpty(t *testing.T) {
