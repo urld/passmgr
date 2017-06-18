@@ -24,11 +24,10 @@ const (
 )
 
 func main() {
-	cmd, filename := parseCmd()
+	cmd, app := parseCmd()
 
 	// setup:
-	app := newTermApp(filename)
-	if isFile(filename) {
+	if isFile(app.filename) {
 		app.Init()
 	} else {
 		app.InitEmpty()
@@ -36,7 +35,7 @@ func main() {
 	loop(app, cmd)
 }
 
-func parseCmd() (command, string) {
+func parseCmd() (command, termApp) {
 	user, err := user.Current()
 	if err != nil {
 		quitErr(err)
@@ -47,6 +46,8 @@ func parseCmd() (command, string) {
 	add := flag.Bool("add", false, "store new credentials")
 	del := flag.Bool("del", false, "delete stored credentials")
 	filename := flag.String("file", defaultFilename, "specify the passmgr store")
+	appTTL := flag.Int("appTTL", 120, "time in seconds after which the application quits if there is no user interaction")
+	clipboardTTL := flag.Int("clipboardTTL", 15, "time in seconds after which the clipboard is reset")
 	flag.Parse()
 
 	cmd := noCmd
@@ -55,14 +56,14 @@ func parseCmd() (command, string) {
 	} else if *del {
 		cmd = delCmd
 	}
-	return cmd, calcFilename(*filename)
+	return cmd, termApp{filename: calcFilename(*filename), clipboardTTL: *clipboardTTL, appTTL: *appTTL}
 }
 
 func loop(app termApp, cmd command) {
 	app.PrintTable()
-	success := true
+	success := false
 	for {
-		timer := time.AfterFunc(1*time.Minute, func() {
+		timer := time.AfterFunc(time.Duration(app.appTTL)*time.Second, func() {
 			fmt.Println("\n[passmgr] Exited due to inactivity.")
 			os.Exit(1)
 		})
@@ -75,6 +76,8 @@ func loop(app termApp, cmd command) {
 			success = app.Delete()
 		case quitCmd:
 			return
+		default:
+			cmd = askCommand()
 		}
 		if success {
 			app.PrintTable()

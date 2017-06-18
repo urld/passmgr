@@ -9,10 +9,15 @@ passphrases and retrieve them via commandline.
 Usage of passmgr:
   -add
     	store new credentials
+  -appTTL int
+    	time in seconds after which the application quits if there is no user interaction (default 120)
+  -clipboardTTL int
+    	time in seconds after which the clipboard is reset (default 15)
   -del
     	delete stored credentials
   -file string
     	specify the passmgr store (default "/home/david/.passmgr_store")
+
 
 In its default mode (no arguments), passmgr allows to select stored passphrases
 which are then copied to the clipboard for a limited amount of time in order

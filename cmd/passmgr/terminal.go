@@ -20,13 +20,11 @@ import (
 
 // termApp provides means to interact with a passmgr store via terminal.
 type termApp struct {
-	filename string
-	store    passmgr.Store
-	subjects []passmgr.Subject
-}
-
-func newTermApp(filename string) termApp {
-	return termApp{filename: filename}
+	filename     string
+	store        passmgr.Store
+	subjects     []passmgr.Subject
+	clipboardTTL int // seconds
+	appTTL       int // seconds
 }
 
 func (app *termApp) Init() {
@@ -120,10 +118,10 @@ func (app *termApp) Get() bool {
 
 	println("")
 	println("Passphrase copied to clipboard!")
-	println("Clipboard will be erased in 6 seconds.")
+	println("Clipboard will be erased in", app.clipboardTTL, "seconds.")
 	println("")
 	setClipboard(passphrase)
-	for i := 1; i <= 6; i++ {
+	for i := 1; i <= app.clipboardTTL; i++ {
 		time.Sleep(1 * time.Second)
 		fmt.Print(".")
 	}
