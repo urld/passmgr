@@ -171,14 +171,27 @@ func (app *termApp) readSelection(prompt string) (int, bool) {
 
 func askConfirm(prompt string, a ...interface{}) bool {
 	switch strings.ToLower(ask(prompt+" [Y/n] ", a...)) {
-	case "y":
-		return true
-	case "":
+	case "y", "":
 		return true
 	case "n":
 		return false
 	default:
 		return askConfirm(prompt)
+	}
+}
+
+func askCommand() command {
+	switch strings.ToLower(ask("Choose a command [(S)elect/(a)dd/(d)elete/(q)uit] ")) {
+	case "a", "add":
+		return addCmd
+	case "d", "delete":
+		return delCmd
+	case "q", "quit":
+		return quitCmd
+	case "s", "select", "":
+		return getCmd
+	default:
+		return askCommand()
 	}
 }
 

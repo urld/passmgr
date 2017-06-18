@@ -19,6 +19,8 @@ const (
 	addCmd command = iota
 	getCmd
 	delCmd
+	quitCmd
+	noCmd
 )
 
 func main() {
@@ -47,7 +49,7 @@ func parseCmd() (command, string) {
 	filename := flag.String("file", defaultFilename, "specify the passmgr store")
 	flag.Parse()
 
-	cmd := getCmd
+	cmd := noCmd
 	if *add {
 		cmd = addCmd
 	} else if *del {
@@ -58,7 +60,7 @@ func parseCmd() (command, string) {
 
 func loop(app termApp, cmd command) {
 	app.PrintTable()
-	success := false
+	success := true
 	for {
 		timer := time.AfterFunc(1*time.Minute, func() {
 			fmt.Println("\n[passmgr] Exited due to inactivity.")
@@ -67,30 +69,16 @@ func loop(app termApp, cmd command) {
 		switch cmd {
 		case getCmd:
 			success = app.Get()
-			if success {
-				if askConfirm("Quit?") {
-					return
-				}
-				app.PrintTable()
-			}
 		case addCmd:
 			success = app.Add()
-			if success {
-				app.PrintTable()
-				if askConfirm("Quit?") {
-					return
-				}
-			}
 		case delCmd:
 			success = app.Delete()
-			if success {
-				app.PrintTable()
-				if askConfirm("Quit?") {
-					return
-				}
-			}
-		default:
-			panic("illegal command")
+		case quitCmd:
+			return
+		}
+		if success {
+			app.PrintTable()
+			cmd = askCommand()
 		}
 		timer.Stop()
 	}

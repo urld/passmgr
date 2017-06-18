@@ -28,6 +28,7 @@ Example:
   3)   david@example.com   twitter.com
   4)   other@example.com   google.com
 
+  Choose a command [(S)elect/(a)dd/(d)elete/(q)uit] s
   Select: 1
 
   Passphrase copied to clipboard!
