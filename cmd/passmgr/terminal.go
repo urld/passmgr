@@ -31,8 +31,8 @@ func newTermApp(filename string) termApp {
 
 func (app *termApp) Init() {
 	if !isFile(app.filename) {
-		Fprintln(os.Stderr, "The passmgr store does not exist yet. Add some passphrases first.")
-		Fprintln(os.Stderr, "See passmgr -h for help.")
+		fprintln(os.Stderr, "The passmgr store does not exist yet. Add some passphrases first.")
+		fprintln(os.Stderr, "See passmgr -h for help.")
 		os.Exit(1)
 	}
 	masterPassphrase := askSecret("[passmgr] master passphrase for %s: ", app.filename)
@@ -66,27 +66,27 @@ func (app *termApp) InitEmpty() {
 func (app *termApp) PrintTable() {
 	app.subjects = app.store.List()
 	if len(app.subjects) == 0 {
-		Println("")
-		Println("-- store is empty --")
-		Println("")
+		println("")
+		println("-- store is empty --")
+		println("")
 		return
 	}
 
-	Println("")
+	println("")
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', tabwriter.StripEscape)
-	Fprintln(w, "n)\t%s\t%s", "User", "URL")
+	fprintln(w, "n)\t%s\t%s", "User", "URL")
 	for i, c := range app.subjects {
-		Fprintln(w, "%d)\t%s\t%s", i+1, c.User, c.URL)
+		fprintln(w, "%d)\t%s\t%s", i+1, c.User, c.URL)
 	}
 	_ = w.Flush()
-	Println("")
+	println("")
 }
 
 const passphraseKey = "passphrase"
 
 func (app *termApp) Add() bool {
 	var subject passmgr.Subject
-	Println("Enter the values for the new entry")
+	println("Enter the values for the new entry")
 	subject.User = ask("\tUser: ")
 	subject.URL = ask("\tURL: ")
 	subject.Secrets = make(map[string]string)
@@ -118,19 +118,19 @@ func (app *termApp) Get() bool {
 		return false
 	}
 
-	Println("")
-	Println("Passphrase copied to clipboard!")
-	Println("Clipboard will be erased in 6 seconds.")
-	Println("")
+	println("")
+	println("Passphrase copied to clipboard!")
+	println("Clipboard will be erased in 6 seconds.")
+	println("")
 	setClipboard(passphrase)
 	for i := 1; i <= 6; i++ {
 		time.Sleep(1 * time.Second)
 		fmt.Print(".")
 	}
 	resetClipboard()
-	Println("")
-	Println("")
-	Println("Passphrase erased from clipboard.")
+	println("")
+	println("")
+	println("Passphrase erased from clipboard.")
 	return true
 }
 
@@ -159,11 +159,11 @@ func (app *termApp) Delete() bool {
 func (app *termApp) readSelection(prompt string) (int, bool) {
 	idx, err := strconv.Atoi(ask(prompt))
 	if err != nil {
-		Fprintln(os.Stderr, "Please type a valid number.")
+		fprintln(os.Stderr, "Please type a valid number.")
 		return 0, false
 	}
 	if idx < 1 || idx > len(app.subjects) {
-		Fprintln(os.Stderr, "Please select a number within this range: %d..%d", 1, len(app.subjects))
+		fprintln(os.Stderr, "Please select a number within this range: %d..%d", 1, len(app.subjects))
 		return 0, false
 	}
 	return idx, true

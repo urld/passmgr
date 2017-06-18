@@ -11,11 +11,11 @@ import (
 	"io"
 )
 
-func Println(a ...interface{}) {
+func println(a ...interface{}) {
 	fmt.Println(a...)
 }
 
-func Fprintln(w io.Writer, format string, a ...interface{}) {
+func fprintln(w io.Writer, format string, a ...interface{}) {
 	s := fmt.Sprintf(format, a...)
 	fmt.Fprintln(w, s)
 }
