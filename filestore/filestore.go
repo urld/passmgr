@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package passmgr
+package filestore
 
 import (
 	"bytes"
@@ -10,6 +10,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"github.com/urld/passmgr"
 )
 
 // fileStore implements a Store whichs contents can be stored encrypted
@@ -18,18 +20,18 @@ type fileStore struct {
 	Cipher
 	filename string
 	salt     []byte
-	subjects []Subject
+	subjects []passmgr.Subject
 }
 
-func (s *fileStore) List() []Subject {
-	l := make([]Subject, len(s.subjects))
+func (s *fileStore) List() []passmgr.Subject {
+	l := make([]passmgr.Subject, len(s.subjects))
 	for i, c := range s.subjects {
-		l[i] = Subject{URL: c.URL, User: c.User}
+		l[i] = passmgr.Subject{URL: c.URL, User: c.User}
 	}
 	return l
 }
 
-func (s *fileStore) Load(subject Subject) (Subject, bool) {
+func (s *fileStore) Load(subject passmgr.Subject) (passmgr.Subject, bool) {
 	for _, sc := range s.subjects {
 		if sc.URL == subject.URL && sc.User == subject.User {
 			return sc, true
@@ -38,7 +40,7 @@ func (s *fileStore) Load(subject Subject) (Subject, bool) {
 	return subject, false
 }
 
-func (s *fileStore) Store(newSubject Subject) {
+func (s *fileStore) Store(newSubject passmgr.Subject) {
 	for i, c := range s.subjects {
 		if c.URL == newSubject.URL && c.User == newSubject.User {
 			s.subjects[i] = newSubject
@@ -48,7 +50,7 @@ func (s *fileStore) Store(newSubject Subject) {
 	s.subjects = append(s.subjects, newSubject)
 }
 
-func (s *fileStore) Delete(subject Subject) bool {
+func (s *fileStore) Delete(subject passmgr.Subject) bool {
 	for i, c := range s.subjects {
 		if c.URL == subject.URL && c.User == subject.User {
 			s.subjects = append(s.subjects[:i], s.subjects[i+1:]...)
@@ -58,7 +60,7 @@ func (s *fileStore) Delete(subject Subject) bool {
 	return false
 }
 
-func (s *fileStore) Persist() error {
+func (s *fileStore) persist() error {
 	content, err := marshalStore(s.subjects)
 	if err != nil {
 		return err
@@ -79,7 +81,7 @@ const (
 	nonceLenV1 = 12
 )
 
-// ReadFileStore reads and decrypts the encrypted contents of a Store from the
+// Read reads and decrypts the encrypted contents of a Store from the
 // specified file.
 //
 // The file starts with a magic number to identify the file format version.
@@ -94,7 +96,7 @@ const (
 //   salt:       32 byte salt for scrypt key derivation
 //   nonce:      12 byte random nonce for aes-gcm
 //   ciphertext: aes256-gcm encrypted json encoded content of Store
-func ReadFileStore(filename, passphrase string) (Store, error) {
+func Read(filename, passphrase string) (passmgr.Store, error) {
 	content, err := readSecretFile(filename)
 	if err != nil {
 		return nil, err
@@ -130,11 +132,11 @@ func ReadFileStore(filename, passphrase string) (Store, error) {
 	return s, err
 }
 
-// WriteFileStore persists a Store to the file it was read from.
+// Write persists a Store to the file it was read from.
 // This function will panic if  store was not created by ReadFileStore.
-func WriteFileStore(store Store) error {
+func Write(store passmgr.Store) error {
 	fStore := store.(*fileStore)
-	return fStore.Persist()
+	return fStore.persist()
 }
 
 func readSecretFile(filename string) ([]byte, error) {
@@ -149,12 +151,12 @@ func readSecretFile(filename string) ([]byte, error) {
 	return ioutil.ReadFile(filename)
 }
 
-func unmarshalStore(content []byte) ([]Subject, error) {
-	var subjects []Subject
+func unmarshalStore(content []byte) ([]passmgr.Subject, error) {
+	var subjects []passmgr.Subject
 	err := json.Unmarshal(content, &subjects)
 	return subjects, err
 }
 
-func marshalStore(subjects []Subject) ([]byte, error) {
+func marshalStore(subjects []passmgr.Subject) ([]byte, error) {
 	return json.Marshal(&subjects)
 }

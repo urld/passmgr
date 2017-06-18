@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package passmgr
+package filestore
 
 import (
 	"crypto/aes"
@@ -70,7 +70,10 @@ func (c *aesGcm) Decrypt(ciphertext []byte) ([]byte, error) {
 	if len(ciphertext) < nonceSize {
 		return nil, errors.New("ciphertext too short")
 	}
-	c.nonce = ciphertext[:nonceSize]
+	if c.nonce == nil {
+		c.nonce = make([]byte, nonceSize)
+	}
+	copy(c.nonce, ciphertext[:nonceSize])
 
 	// decrypt:
 	return c.AEAD.Open(ciphertext[:0], c.nonce, ciphertext[nonceSize:], nil)

@@ -1,12 +1,14 @@
 // Copyright (c) 2017, David Url
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-package passmgr
+package filestore
 
 import (
 	"io"
 	"os"
 	"testing"
+
+	"github.com/urld/passmgr"
 )
 
 const fileUnderTest = "testdata/.store_under_test"
@@ -34,7 +36,7 @@ func getTestFile(t *testing.T, name string) string {
 }
 
 func TestNewStoreIsEmpty(t *testing.T) {
-	store, err := ReadFileStore("notExistFile", masterPassphrase)
+	store, err := Read("notExistFile", masterPassphrase)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +48,7 @@ func TestNewStoreIsEmpty(t *testing.T) {
 }
 
 func TestStoreAddNewSubject(t *testing.T) {
-	store, err := ReadFileStore("notExistFile", masterPassphrase)
+	store, err := Read("notExistFile", masterPassphrase)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,7 +58,7 @@ func TestStoreAddNewSubject(t *testing.T) {
 	secrets := make(map[string]string)
 	secrets[passphraseKey] = "secret"
 
-	subj := Subject{User: user, URL: url, Secrets: secrets}
+	subj := passmgr.Subject{User: user, URL: url, Secrets: secrets}
 	store.Store(subj)
 
 	subjects := store.List()
@@ -74,7 +76,7 @@ func TestStoreAddNewSubject(t *testing.T) {
 func TestLoadMultipleUsersSingleUrl(t *testing.T) {
 	filename := getTestFile(t, "testdata/multipleUsers_singleUrl")
 	defer remove(t, filename)
-	store, err := ReadFileStore(filename, masterPassphrase)
+	store, err := Read(filename, masterPassphrase)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,7 +84,7 @@ func TestLoadMultipleUsersSingleUrl(t *testing.T) {
 	subjects := store.List()
 	assertEqual(t, 2, len(subjects), "2 subjects should be present")
 
-	subj1, ok := store.Load(Subject{User: "user1", URL: "example.com"})
+	subj1, ok := store.Load(passmgr.Subject{User: "user1", URL: "example.com"})
 	if !ok {
 		t.Error("successful load should return true")
 	}
@@ -96,7 +98,7 @@ func TestLoadMultipleUsersSingleUrl(t *testing.T) {
 	assertEqual(t, 1, len(subj1.Secrets), "len(Secrets)")
 	assertEqual(t, "secret1", subj1.Secrets[passphraseKey], "Secrets")
 
-	subj2, ok := store.Load(Subject{User: "user2", URL: "example.com"})
+	subj2, ok := store.Load(passmgr.Subject{User: "user2", URL: "example.com"})
 	if !ok {
 		t.Error("successful load should return true")
 	}
@@ -114,7 +116,7 @@ func TestLoadMultipleUsersSingleUrl(t *testing.T) {
 func TestWriteIsReadable(t *testing.T) {
 	filename := getTestFile(t, "testdata/multipleUsers_singleUrl")
 	defer remove(t, filename)
-	store, err := ReadFileStore(filename, masterPassphrase)
+	store, err := Read(filename, masterPassphrase)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -126,15 +128,15 @@ func TestWriteIsReadable(t *testing.T) {
 	url := "example.com"
 	secrets := make(map[string]string)
 	secrets[passphraseKey] = "secret"
-	subj := Subject{User: user, URL: url, Secrets: secrets}
+	subj := passmgr.Subject{User: user, URL: url, Secrets: secrets}
 	store.Store(subj)
 
-	err = WriteFileStore(store)
+	err = Write(store)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	store2, err := ReadFileStore(filename, masterPassphrase)
+	store2, err := Read(filename, masterPassphrase)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,14 +147,14 @@ func TestWriteIsReadable(t *testing.T) {
 func TestDeleteSubject(t *testing.T) {
 	filename := getTestFile(t, "testdata/multipleUsers_singleUrl")
 	defer remove(t, filename)
-	store, err := ReadFileStore(filename, masterPassphrase)
+	store, err := Read(filename, masterPassphrase)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	subjects := store.List()
 	assertEqual(t, 2, len(subjects), "2 subjects should be present")
-	delSubj, ok := store.Load(Subject{User: "user2", URL: "example.com"})
+	delSubj, ok := store.Load(passmgr.Subject{User: "user2", URL: "example.com"})
 	if !ok {
 		t.Error("successful load should return true")
 	}
@@ -162,11 +164,11 @@ func TestDeleteSubject(t *testing.T) {
 
 	subjects = store.List()
 	assertEqual(t, 1, len(subjects), "only 1 subject should be present")
-	_, ok = store.Load(Subject{User: "user1", URL: "example.com"})
+	_, ok = store.Load(passmgr.Subject{User: "user1", URL: "example.com"})
 	if !ok {
 		t.Error("successful load should return true")
 	}
-	_, ok = store.Load(Subject{User: "user2", URL: "example.com"})
+	_, ok = store.Load(passmgr.Subject{User: "user2", URL: "example.com"})
 	if ok {
 		t.Error("failed load should return false")
 	}
@@ -175,7 +177,7 @@ func TestDeleteSubject(t *testing.T) {
 func TestInvalidMagicNumber(t *testing.T) {
 	filename := getTestFile(t, "testdata/invalid")
 	defer remove(t, filename)
-	_, err := ReadFileStore(filename, masterPassphrase)
+	_, err := Read(filename, masterPassphrase)
 	if err == nil {
 		t.Error("ReadFileStore should return error on invalid file")
 	}
@@ -184,14 +186,14 @@ func TestInvalidMagicNumber(t *testing.T) {
 func TestInvalidMasterPassphrase(t *testing.T) {
 	filename := getTestFile(t, "testdata/invalid")
 	defer remove(t, filename)
-	_, err := ReadFileStore(filename, "invalidMasterPassphrase")
+	_, err := Read(filename, "invalidMasterPassphrase")
 	if err == nil {
 		t.Error("ReadFileStore should return error on invalid master passphrase")
 	}
 }
 
 func TestNewStoreIsWritten(t *testing.T) {
-	store, err := ReadFileStore("notExistFile", masterPassphrase)
+	store, err := Read("notExistFile", masterPassphrase)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -202,7 +204,7 @@ func TestNewStoreIsWritten(t *testing.T) {
 	}
 
 	defer remove(t, "notExistFile")
-	err = WriteFileStore(store)
+	err = Write(store)
 	if err != nil {
 		t.Fatal(err)
 	}

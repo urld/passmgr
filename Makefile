@@ -22,7 +22,7 @@ build: clean_build
 	go build github.com/urld/passmgr/cmd/passmgr
 
 test:
-	go test github.com/urld/passmgr
+	go test github.com/urld/passmgr/...
 
 
 install: test

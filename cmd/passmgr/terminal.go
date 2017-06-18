@@ -15,6 +15,7 @@ import (
 
 	"github.com/bgentry/speakeasy"
 	"github.com/urld/passmgr"
+	"github.com/urld/passmgr/filestore"
 )
 
 // termApp provides means to interact with a passmgr store via terminal.
@@ -36,7 +37,7 @@ func (app *termApp) Init() {
 	}
 	masterPassphrase := askSecret("[passmgr] master passphrase for %s: ", app.filename)
 
-	store, err := passmgr.ReadFileStore(app.filename, masterPassphrase)
+	store, err := filestore.Read(app.filename, masterPassphrase)
 	if err != nil {
 		quitErr(err)
 	}
@@ -49,14 +50,14 @@ func (app *termApp) InitEmpty() {
 	if masterPassphrase != askSecret("[passmgr] retype master passphrase for %s: ", app.filename) {
 		quitErr(fmt.Errorf("error: passphrases did not match"))
 	}
-	store, err := passmgr.ReadFileStore(app.filename, masterPassphrase)
+	store, err := filestore.Read(app.filename, masterPassphrase)
 	if err != nil {
 		quitErr(err)
 	}
 	app.store = store
 	app.subjects = store.List()
 
-	err = passmgr.WriteFileStore(store)
+	err = filestore.Write(store)
 	if err != nil {
 		quitErr(err)
 	}
@@ -92,7 +93,7 @@ func (app *termApp) Add() bool {
 	subject.Secrets[passphraseKey] = askSecret("\tPassphrase: ")
 
 	app.store.Store(subject)
-	err := passmgr.WriteFileStore(app.store)
+	err := filestore.Write(app.store)
 	if err != nil {
 		quitErr(err)
 	}
@@ -148,7 +149,7 @@ func (app *termApp) Delete() bool {
 	}
 
 	app.store.Delete(app.subjects[idx-1])
-	err := passmgr.WriteFileStore(app.store)
+	err := filestore.Write(app.store)
 	if err != nil {
 		quitErr(err)
 	}
