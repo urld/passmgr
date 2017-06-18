@@ -34,3 +34,10 @@ see [GoDoc](https://godoc.org/github.com/urld/passmgr/cmd/passmgr)
 
 * no protection against keyloggers
 * no protection against cliboard spies
+
+
+## TODO
+
+* look into improved clipboard handling [hn comment](https://news.ycombinator.com/item?id=14581411)
+* atomic rewrite of filestore
+* filter subjects [hn comment](https://news.ycombinator.com/item?id=14581359)
