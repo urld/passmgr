@@ -46,14 +46,17 @@ func newGCM(key []byte) (Cipher, error) {
 func (c *aesGcm) Encrypt(plaintext []byte) ([]byte, error) {
 	// setup nonce:
 	nonceSize := c.AEAD.NonceSize()
-	ciphertext := make([]byte, nonceSize+len(plaintext)+c.AEAD.Overhead())
 	if c.nonce == nil {
+		// initial random nonce generation
+		c.nonce = make([]byte, nonceSize)
 		if _, err := io.ReadFull(rand.Reader, c.nonce); err != nil {
 			return nil, err
 		}
 	} else {
 		c.incrementNonce()
 	}
+
+	ciphertext := make([]byte, nonceSize+len(plaintext)+c.AEAD.Overhead())
 	copy(ciphertext[:nonceSize], c.nonce)
 
 	// encrypt:

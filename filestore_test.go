@@ -13,15 +13,15 @@ const fileUnderTest = "testdata/.store_under_test"
 const masterPassphrase = "123"
 const passphraseKey = "passphrase"
 
-func getTestFile(name string) string {
+func getTestFile(t *testing.T, name string) string {
 	in, err := os.Open(name)
 	if err != nil {
 		panic(err)
 	}
-	defer in.Close()
+	defer close(t, in)
 
 	testFile, err := os.Create(fileUnderTest)
-	defer testFile.Close()
+	defer close(t, testFile)
 	if err != nil {
 		panic(err)
 	}
@@ -34,7 +34,6 @@ func getTestFile(name string) string {
 }
 
 func TestNewStoreIsEmpty(t *testing.T) {
-	defer os.Remove(fileUnderTest)
 	store, err := ReadFileStore("notExistFile", masterPassphrase)
 	if err != nil {
 		t.Fatal(err)
@@ -47,7 +46,6 @@ func TestNewStoreIsEmpty(t *testing.T) {
 }
 
 func TestStoreAddNewSubject(t *testing.T) {
-	defer os.Remove(fileUnderTest)
 	store, err := ReadFileStore("notExistFile", masterPassphrase)
 	if err != nil {
 		t.Fatal(err)
@@ -74,8 +72,8 @@ func TestStoreAddNewSubject(t *testing.T) {
 }
 
 func TestLoadMultipleUsersSingleUrl(t *testing.T) {
-	filename := getTestFile("testdata/multipleUsers_singleUrl")
-	defer os.Remove(filename)
+	filename := getTestFile(t, "testdata/multipleUsers_singleUrl")
+	defer remove(t, filename)
 	store, err := ReadFileStore(filename, masterPassphrase)
 	if err != nil {
 		t.Fatal(err)
@@ -114,8 +112,8 @@ func TestLoadMultipleUsersSingleUrl(t *testing.T) {
 }
 
 func TestWriteIsReadable(t *testing.T) {
-	filename := getTestFile("testdata/multipleUsers_singleUrl")
-	defer os.Remove(filename)
+	filename := getTestFile(t, "testdata/multipleUsers_singleUrl")
+	defer remove(t, filename)
 	store, err := ReadFileStore(filename, masterPassphrase)
 	if err != nil {
 		t.Fatal(err)
@@ -145,8 +143,8 @@ func TestWriteIsReadable(t *testing.T) {
 }
 
 func TestDeleteSubject(t *testing.T) {
-	filename := getTestFile("testdata/multipleUsers_singleUrl")
-	defer os.Remove(filename)
+	filename := getTestFile(t, "testdata/multipleUsers_singleUrl")
+	defer remove(t, filename)
 	store, err := ReadFileStore(filename, masterPassphrase)
 	if err != nil {
 		t.Fatal(err)
@@ -175,8 +173,8 @@ func TestDeleteSubject(t *testing.T) {
 }
 
 func TestInvalidMagicNumber(t *testing.T) {
-	filename := getTestFile("testdata/invalid")
-	defer os.Remove(filename)
+	filename := getTestFile(t, "testdata/invalid")
+	defer remove(t, filename)
 	_, err := ReadFileStore(filename, masterPassphrase)
 	if err == nil {
 		t.Error("ReadFileStore should return error on invalid file")
@@ -184,10 +182,28 @@ func TestInvalidMagicNumber(t *testing.T) {
 }
 
 func TestInvalidMasterPassphrase(t *testing.T) {
-	filename := getTestFile("testdata/invalid")
-	defer os.Remove(filename)
+	filename := getTestFile(t, "testdata/invalid")
+	defer remove(t, filename)
 	_, err := ReadFileStore(filename, "invalidMasterPassphrase")
 	if err == nil {
 		t.Error("ReadFileStore should return error on invalid master passphrase")
+	}
+}
+
+func TestNewStoreIsWritten(t *testing.T) {
+	store, err := ReadFileStore("notExistFile", masterPassphrase)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	subjects := store.List()
+	if len(subjects) != 0 {
+		t.Error("new store is not empty")
+	}
+
+	defer remove(t, "notExistFile")
+	err = WriteFileStore(store)
+	if err != nil {
+		t.Fatal(err)
 	}
 }

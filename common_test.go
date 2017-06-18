@@ -6,6 +6,8 @@ package passmgr
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"os"
 	"testing"
 )
 
@@ -22,4 +24,18 @@ func assertEqual(t *testing.T, a, b interface{}, message string) {
 	}
 	msg := fmt.Sprintf("%s: %v != %v", message, a, b)
 	t.Error(msg)
+}
+
+func remove(t *testing.T, filename string) {
+	err := os.Remove(filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func close(t *testing.T, c io.Closer) {
+	err := c.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
 }
