@@ -19,6 +19,7 @@ const (
 	addCmd command = iota
 	getCmd
 	delCmd
+	filterCmd
 	quitCmd
 	noCmd
 )
@@ -74,6 +75,8 @@ func loop(app termApp, cmd command) {
 			success = app.Add()
 		case delCmd:
 			success = app.Delete()
+		case filterCmd:
+			success = app.Filter()
 		case quitCmd:
 			return
 		default:

@@ -23,25 +23,35 @@ In its default mode (no arguments), passmgr allows to select stored passphrases
 which are then copied to the clipboard for a limited amount of time in order
 to be pasted into a passphrase field. After this time, the clipboard is erased.
 
-Example:
+Select Example:
   $ passmgr
   [passmgr] master passphrase for /home/david/.passmgr_store:
 
   n)   User                URL
   1)   urld                github.com
   2)   david@example.com   facebook.com
-  3)   david@example.com   twitter.com
+  3)   david               twitter.com
   4)   other@example.com   google.com
 
-  Choose a command [(S)elect/(a)dd/(d)elete/(q)uit] s
+  Choose a command [(S)elect/(f)ilter/(a)dd/(d)elete/(q)uit]
   Select: 1
 
   Passphrase copied to clipboard!
-  Clipboard will be erased in 6 seconds.
+  Clipboard will be erased in 15 seconds.
 
-  ......
+  ...............
 
   Passphrase erased from clipboard.
+
+Filter Example:
+  # ...
+
+  Choose a command [(S)elect/(f)ilter/(a)dd/(d)elete/(q)uit] f
+  Filter: david
+
+  n)   User                URL
+  2)   david@example.com   facebook.com
+  3)   david               twitter.com
 
 
 All credentials are stored AES256-GCM encrypted in a single file which by default

@@ -25,6 +25,7 @@ type termApp struct {
 	subjects     []passmgr.Subject
 	clipboardTTL int // seconds
 	appTTL       int // seconds
+	filter       string
 }
 
 func (app *termApp) Init() {
@@ -74,7 +75,9 @@ func (app *termApp) PrintTable() {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', tabwriter.StripEscape)
 	fprintln(w, "n)\t%s\t%s", "User", "URL")
 	for i, c := range app.subjects {
-		fprintln(w, "%d)\t%s\t%s", i+1, c.User, c.URL)
+		if strings.Contains(c.User, app.filter) || strings.Contains(c.URL, app.filter) {
+			fprintln(w, "%d)\t%s\t%s", i+1, c.User, c.URL)
+		}
 	}
 	_ = w.Flush()
 	println("")
@@ -154,6 +157,15 @@ func (app *termApp) Delete() bool {
 	return true
 }
 
+func (app *termApp) Filter() bool {
+	if len(app.subjects) == 0 {
+		return true
+	}
+
+	app.filter = ask("Filter: ")
+	return true
+}
+
 func (app *termApp) readSelection(prompt string) (int, bool) {
 	idx, err := strconv.Atoi(ask(prompt))
 	if err != nil {
@@ -179,11 +191,13 @@ func askConfirm(prompt string, a ...interface{}) bool {
 }
 
 func askCommand() command {
-	switch strings.ToLower(ask("Choose a command [(S)elect/(a)dd/(d)elete/(q)uit] ")) {
+	switch strings.ToLower(ask("Choose a command [(S)elect/(f)ilter/(a)dd/(d)elete/(q)uit] ")) {
 	case "a", "add":
 		return addCmd
 	case "d", "delete":
 		return delCmd
+	case "f", "filter":
+		return filterCmd
 	case "q", "quit":
 		return quitCmd
 	case "s", "select", "":
