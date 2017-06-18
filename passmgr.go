@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package passmgr implements a secure store for credentials.
+// Package passmgr defines a store for credentials.
 package passmgr
 
 // Store provides access to stored credentials.

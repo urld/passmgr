@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package filestore implements a secure passmgr.Store.
+// The contents are stored encrypted in a single file.
 package filestore
 
 import (
