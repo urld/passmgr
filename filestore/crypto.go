@@ -15,10 +15,10 @@ import (
 	"golang.org/x/crypto/scrypt"
 )
 
-// Cipher provides methods to encrypt and decrypt arbitrary content.
+// aesCipher provides methods to encrypt and decrypt arbitrary content.
 // The returned byte slice of each operation is guaranteed to be a valid
 // input for the opposite operation.
-type Cipher interface {
+type aesCipher interface {
 	Encrypt(plaintext []byte) ([]byte, error)
 	Decrypt(ciphertext []byte) ([]byte, error)
 }
@@ -28,7 +28,7 @@ type aesGcm struct {
 	nonce []byte
 }
 
-func newGCM(key []byte) (Cipher, error) {
+func newGCM(key []byte) (aesCipher, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -39,8 +39,7 @@ func newGCM(key []byte) (Cipher, error) {
 		return nil, err
 	}
 
-	cipher := &aesGcm{AEAD: aead, nonce: nil}
-	return cipher, nil
+	return &aesGcm{AEAD: aead, nonce: nil}, nil
 }
 
 func (c *aesGcm) Encrypt(plaintext []byte) ([]byte, error) {

@@ -17,7 +17,7 @@ import (
 // fileStore implements a Store whichs contents can be stored encrypted
 // in a file.
 type fileStore struct {
-	Cipher
+	aesCipher
 	filename string
 	salt     []byte
 	subjects []passmgr.Subject
@@ -65,7 +65,7 @@ func (s *fileStore) persist() error {
 	if err != nil {
 		return err
 	}
-	content, err = s.Cipher.Encrypt(content)
+	content, err = s.aesCipher.Encrypt(content)
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func Read(filename, passphrase string) (passmgr.Store, error) {
 	}
 
 	if len(content) == saltLenV1 {
-		return &fileStore{Cipher: cipher, filename: filename, salt: salt}, nil
+		return &fileStore{aesCipher: cipher, filename: filename, salt: salt}, nil
 	}
 
 	ciphertext := content[saltLenV1:]
@@ -128,7 +128,7 @@ func Read(filename, passphrase string) (passmgr.Store, error) {
 	}
 
 	subjects, err := unmarshalStore(plaintext)
-	s := &fileStore{Cipher: cipher, filename: filename, salt: salt, subjects: subjects}
+	s := &fileStore{aesCipher: cipher, filename: filename, salt: salt, subjects: subjects}
 	return s, err
 }
 
