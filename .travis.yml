@@ -1,0 +1,13 @@
+language: go
+
+go:
+  - 1.x
+  - master
+
+before_install:
+  - go get -v github.com/atotto/clipboard
+  - go get -v github.com/bgentry/speakeasy
+  - go get -v golang.org/x/crypto/scrypt
+
+script:
+  - go test -v ./...
