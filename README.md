@@ -1,6 +1,7 @@
 # passmgr
 
 [![Build Status](https://travis-ci.org/urld/passmgr.svg?branch=master)](https://travis-ci.org/urld/passmgr)
+[![Go Report Card](https://goreportcard.com/badge/github.com/urld/passmgr)](https://goreportcard.com/report/github.com/urld/passmgr)
 [![GoDoc](https://godoc.org/github.com/urld/passmgr/cmd/passmgr?status.svg)](https://godoc.org/github.com/urld/passmgr/cmd/passmgr)
 
 `passmgr` is a simple portable password manager.
