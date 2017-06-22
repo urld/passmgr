@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/urld/passmgr"
 )
@@ -73,7 +74,17 @@ func (s *fileStore) persist() error {
 	}
 	content = append(s.salt, content...)
 	content = append(magicnumberV1, content...)
-	return ioutil.WriteFile(s.filename, content, os.FileMode(0600))
+
+	// write to temp file first and rename to actual target file
+	// to ensure write operation to be atomic, so the old file is not
+	// lost on errors during write.
+	tmpFileName := s.filename + string(time.Now().Unix())
+	err = ioutil.WriteFile(tmpFileName, content, os.FileMode(0600))
+	if err != nil {
+		_ = os.Remove(tmpFileName)
+		return err
+	}
+	return os.Rename(tmpFileName, s.filename)
 }
 
 // magic number to detect the version of the file format.
