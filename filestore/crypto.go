@@ -52,7 +52,9 @@ func (c *aesGcm) Encrypt(plaintext []byte) ([]byte, error) {
 			return nil, err
 		}
 	} else {
-		c.incrementNonce()
+		if err := c.incrementNonce(); err != nil {
+			return nil, err
+		}
 	}
 
 	ciphertext := make([]byte, nonceSize+len(plaintext)+c.AEAD.Overhead())
@@ -78,10 +80,18 @@ func (c *aesGcm) Decrypt(ciphertext []byte) ([]byte, error) {
 	return c.AEAD.Open(ciphertext[:0], c.nonce, ciphertext[nonceSize:], nil)
 }
 
-func (c *aesGcm) incrementNonce() {
+func (c *aesGcm) incrementNonce() error {
+	// increment the counter part of the nonce:
 	counter := binary.BigEndian.Uint64(c.nonce[4:])
 	counter++
 	binary.BigEndian.PutUint64(c.nonce[4:], counter)
+	// Change the random part of the nonce too, to avoid nonce reuse.
+	// Nonce reuse could occur if a previous version of the store file
+	// is checked out or restored using version control software like git
+	// or other backup mechanisms.
+	_, err := io.ReadFull(rand.Reader, c.nonce[:4])
+	return err
+
 }
 
 // genSalt generates a salt, which can be used for the deriveKey fuction.

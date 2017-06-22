@@ -26,6 +26,21 @@ func assertEqual(t *testing.T, a, b interface{}, message string) {
 	t.Error(msg)
 }
 
+func assertNotEqual(t *testing.T, a, b interface{}, message string) {
+	switch a.(type) {
+	case []byte:
+		if !bytes.Equal(a.([]byte), b.([]byte)) {
+			return
+		}
+	default:
+		if a != b {
+			return
+		}
+	}
+	msg := fmt.Sprintf("%s: %v == %v", message, a, b)
+	t.Error(msg)
+}
+
 func remove(t *testing.T, filename string) {
 	err := os.Remove(filename)
 	if err != nil {
