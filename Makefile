@@ -13,7 +13,12 @@ all: test install dist
 
 dist: build
 	mkdir -p $(RELEASE_DIR)
-	cp LICENSE $(BUILD_DIR)/
+	mkdir -p $(BUILD_DIR)/licenses
+	cp $(GOPATH)/src/github.com/bgentry/speakeasy/LICENSE $(BUILD_DIR)/licenses/bgentry.speakeasy.LICENSE
+	cp $(GOPATH)/src/github.com/bgentry/speakeasy/LICENSE_WINDOWS $(BUILD_DIR)/licenses/bgentry.speakeasy.LICENSE_WINDOWS
+	cp $(GOPATH)/src/github.com/atotto/clipboard/LICENSE $(BUILD_DIR)/licenses/atotto.clipboard.LICENSE
+	cp $(GOPATH)/src/golang.org/x/crypto/LICENSE $(BUILD_DIR)/licenses/golang.crypto.LICENSE
+	cp LICENSE $(BUILD_DIR)/licenses/passmgr.LICENSE
 	tar -cvzf  $(RELEASE_DIR)/$(RELEASE_FILE).tar.gz $(BUILD_DIR) --transform='s/$(BUILD_DIR)/$(RELEASE_FILE)/g'
 
 build: clean_build
