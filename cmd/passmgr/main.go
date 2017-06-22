@@ -20,6 +20,7 @@ const (
 	getCmd
 	delCmd
 	filterCmd
+	changeKeyCmd
 	quitCmd
 	noCmd
 )
@@ -51,6 +52,7 @@ func parseCmd() (command, termApp) {
 	appTTL := flag.Int("appTTL", 120, "time in seconds after which the application quits if there is no user interaction")
 	clipboardTTL := flag.Int("clipboardTTL", 15, "time in seconds after which the clipboard is reset")
 	importFilename := flag.String("import", "", "file to import credentials from")
+	changeKey := flag.Bool("change-key", false, "change the master passphrase")
 	flag.Parse()
 
 	cmd := noCmd
@@ -58,6 +60,8 @@ func parseCmd() (command, termApp) {
 		cmd = addCmd
 	} else if *del {
 		cmd = delCmd
+	} else if *changeKey {
+		cmd = changeKeyCmd
 	}
 	return cmd, termApp{filename: calcFilename(*filename), clipboardTTL: *clipboardTTL, appTTL: *appTTL, importFilename: *importFilename}
 }
@@ -79,6 +83,8 @@ func loop(app termApp, cmd command) {
 			success = app.Delete()
 		case filterCmd:
 			success = app.Filter()
+		case changeKeyCmd:
+			success = app.ChangeKey()
 		case quitCmd:
 			return
 		default:

@@ -146,10 +146,34 @@ func Read(filename, passphrase string) (passmgr.Store, error) {
 }
 
 // Write persists a Store to the file it was read from.
-// This function will panic if  store was not created by ReadFileStore.
+// This function will panic if store was not created by ReadFileStore.
 func Write(store passmgr.Store) error {
 	fStore := store.(*fileStore)
 	return fStore.persist()
+}
+
+// ChangeKey generates a new salt and key for a Store.
+// This function will panic if store was not created by ReadFileStore.
+func ChangeKey(store passmgr.Store, newPassphrase string) error {
+	fStore := store.(*fileStore)
+
+	salt, err := genSalt()
+	if err != nil {
+		return err
+	}
+	fStore.salt = salt
+
+	key, err := deriveKey([]byte(newPassphrase), fStore.salt)
+	if err != nil {
+		return err
+	}
+	cipher, err := newGCM(key)
+	if err != nil {
+		return err
+	}
+
+	fStore.aesCipher = cipher
+	return nil
 }
 
 func readSecretFile(filename string) ([]byte, error) {

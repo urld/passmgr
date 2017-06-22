@@ -11,6 +11,8 @@ Usage of passmgr:
     	store new credentials
   -appTTL int
     	time in seconds after which the application quits if there is no user interaction (default 120)
+  -change-key
+    	change the master passphrase
   -clipboardTTL int
     	time in seconds after which the clipboard is reset (default 15)
   -del

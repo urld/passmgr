@@ -47,6 +47,24 @@ func (app *termApp) Init() {
 	app.subjects = store.List()
 }
 
+func (app *termApp) ChangeKey() bool {
+	masterPassphrase := askSecret("[passmgr] new master passphrase for %s: ", app.filename)
+	if masterPassphrase != askSecret("[passmgr] retype master passphrase for %s: ", app.filename) {
+		quitErr(fmt.Errorf("error: passphrases did not match"))
+	}
+
+	err := filestore.ChangeKey(app.store, masterPassphrase)
+	if err != nil {
+		quitErr(err)
+	}
+
+	err = filestore.Write(app.store)
+	if err != nil {
+		quitErr(err)
+	}
+	return true
+}
+
 func (app *termApp) InitEmpty() {
 	masterPassphrase := askSecret("[passmgr] new master passphrase for %s: ", app.filename)
 	if masterPassphrase != askSecret("[passmgr] retype master passphrase for %s: ", app.filename) {
@@ -158,11 +176,11 @@ func (app *termApp) Get() bool {
 	println("Clipboard will be erased in", app.clipboardTTL, "seconds.")
 	println("")
 	setClipboard(passphrase)
+	defer resetClipboard()
 	for i := 1; i <= app.clipboardTTL; i++ {
 		time.Sleep(1 * time.Second)
 		fmt.Print(".")
 	}
-	resetClipboard()
 	println("")
 	println("")
 	println("Passphrase erased from clipboard.")
