@@ -6,7 +6,9 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -20,12 +22,13 @@ import (
 
 // termApp provides means to interact with a passmgr store via terminal.
 type termApp struct {
-	filename     string
-	store        passmgr.Store
-	subjects     []passmgr.Subject
-	clipboardTTL int // seconds
-	appTTL       int // seconds
-	filter       string
+	filename       string
+	store          passmgr.Store
+	subjects       []passmgr.Subject
+	clipboardTTL   int // seconds
+	appTTL         int // seconds
+	importFilename string
+	filter         string
 }
 
 func (app *termApp) Init() {
@@ -57,6 +60,37 @@ func (app *termApp) InitEmpty() {
 	app.subjects = store.List()
 
 	err = filestore.Write(store)
+	if err != nil {
+		quitErr(err)
+	}
+}
+
+func (app *termApp) Import() {
+	if app.importFilename == "" {
+		return
+	}
+
+	content, err := ioutil.ReadFile(app.importFilename)
+	if err != nil {
+		println("could not import:", err)
+		return
+	}
+	var subjects []passmgr.Subject
+	err = json.Unmarshal(content, &subjects)
+	if err != nil {
+		println("could not import:", err)
+		return
+	}
+
+	for _, subj := range subjects {
+		app.store.Store(subj)
+	}
+
+	app.PrintTable()
+	if !askConfirm("Do you which to save the imported changes?") {
+		quitErr(fmt.Errorf("import aborted."))
+	}
+	err = filestore.Write(app.store)
 	if err != nil {
 		quitErr(err)
 	}

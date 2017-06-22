@@ -33,6 +33,7 @@ func main() {
 	} else {
 		app.InitEmpty()
 	}
+	app.Import()
 	loop(app, cmd)
 }
 
@@ -49,6 +50,7 @@ func parseCmd() (command, termApp) {
 	filename := flag.String("file", defaultFilename, "specify the passmgr store")
 	appTTL := flag.Int("appTTL", 120, "time in seconds after which the application quits if there is no user interaction")
 	clipboardTTL := flag.Int("clipboardTTL", 15, "time in seconds after which the clipboard is reset")
+	importFilename := flag.String("import", "", "file to import credentials from")
 	flag.Parse()
 
 	cmd := noCmd
@@ -57,7 +59,7 @@ func parseCmd() (command, termApp) {
 	} else if *del {
 		cmd = delCmd
 	}
-	return cmd, termApp{filename: calcFilename(*filename), clipboardTTL: *clipboardTTL, appTTL: *appTTL}
+	return cmd, termApp{filename: calcFilename(*filename), clipboardTTL: *clipboardTTL, appTTL: *appTTL, importFilename: *importFilename}
 }
 
 func loop(app termApp, cmd command) {
