@@ -191,7 +191,7 @@ func askConfirm(prompt string, a ...interface{}) bool {
 }
 
 func askCommand() command {
-	switch strings.ToLower(ask("Choose a command [(S)elect/(f)ilter/(a)dd/(d)elete/(q)uit] ")) {
+	switch strings.ToLower(ask("Command: (S)elect, (f)ilter, (a)dd, (d)elete or (q)uit? ")) {
 	case "a", "add":
 		return addCmd
 	case "d", "delete":
