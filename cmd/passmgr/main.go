@@ -46,8 +46,6 @@ func parseCmd() (command, termApp) {
 	defaultFilename := filepath.Join(user.HomeDir, ".passmgr_store")
 
 	// cmd parsing:
-	add := flag.Bool("add", false, "store new credentials")
-	del := flag.Bool("del", false, "delete stored credentials")
 	filename := flag.String("file", defaultFilename, "specify the passmgr store")
 	appTTL := flag.Int("appTTL", 120, "time in seconds after which the application quits if there is no user interaction")
 	clipboardTTL := flag.Int("clipboardTTL", 15, "time in seconds after which the clipboard is reset")
@@ -56,11 +54,7 @@ func parseCmd() (command, termApp) {
 	flag.Parse()
 
 	cmd := noCmd
-	if *add {
-		cmd = addCmd
-	} else if *del {
-		cmd = delCmd
-	} else if *changeKey {
+	if *changeKey {
 		cmd = changeKeyCmd
 	}
 	return cmd, termApp{filename: calcFilename(*filename), clipboardTTL: *clipboardTTL, appTTL: *appTTL, importFilename: *importFilename}
