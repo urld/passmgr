@@ -105,7 +105,7 @@ func (app *termApp) Import() {
 	}
 
 	app.PrintTable()
-	if !askConfirm("Do you which to save the imported changes?") {
+	if !askConfirm("Do you wish to save the imported changes?") {
 		quitErr(fmt.Errorf("import aborted."))
 	}
 	err = filestore.Write(app.store)

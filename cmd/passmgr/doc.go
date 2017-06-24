@@ -37,11 +37,11 @@ Select Example:
 
   n)   User                URL
   1)   urld                github.com
-  2)   david@example.com   facebook.com
-  3)   david               twitter.com
-  4)   other@example.com   google.com
+  2)   david               twitter.com
+  3)   david               example.com
+  4)   other@example.com   twitter.com
 
-  Choose a command [(S)elect/(f)ilter/(a)dd/(d)elete/(q)uit]
+  Command: (S)elect, (f)ilter, (a)dd, (d)elete or (q)uit?
   Select: 1
 
   Passphrase copied to clipboard!
@@ -54,35 +54,39 @@ Select Example:
 Filter Example:
   # ...
 
-  Choose a command [(S)elect/(f)ilter/(a)dd/(d)elete/(q)uit] f
-  Filter: david
+  Command: (S)elect, (f)ilter, (a)dd, (d)elete or (q)uit? f
+  Filter: twitterdavid
 
-  n)   User                URL
-  2)   david@example.com   facebook.com
-  3)   david               twitter.com
+  n)   User    URL
+  2)   david   twitter.com
+  3)   david   example.com
+
+The filter can be reset by leaving it empty.
 
 Import Example:
   $ passmgr -import dump.json
   [passmgr] master passphrase for /home/david/.passmgr_store:
 
-  n)   User    URL
-  1)   david   example.com
-  2)   david   github.com
-  3)   david   google.com
-  4)   david   facebook.com
+  n)   User                URL
+  1)   urld                github.com
+  2)   david               twitter.com
+  3)   david               example.com
+  4)   other@example.com   twitter.com
+  5)   import1             github.com
+  6)   import2             google.com
+  7)   import3             facebook.com
 
-  Do you which to save the imported changes? [Y/n]
+  Do you wish to save the imported changes? [Y/n]
 
-Where dump.json looks like this:
+The dump.json has to look like this:
   [
-    {"User":"david", "URL":"github.com", "Secrets":{"passphrase":"secret2"}},
-    {"User":"david", "URL":"google.com", "Secrets":{"passphrase":"secret3"}},
-    {"User":"david", "URL":"facebook.com", "Secrets":{"passphrase":"secret4"}},
+    {"User":"import1", "URL":"github.com", "Secrets":{"passphrase":"secret2"}},
+    {"User":"import2", "URL":"google.com", "Secrets":{"passphrase":"secret3"}},
+    {"User":"import3", "URL":"facebook.com", "Secrets":{"passphrase":"secret4"}},
   ]
 
 Please make sure you delete the json file after it is imported, since it contains
 all your secrets in plaintext.
-
 
 
 */
