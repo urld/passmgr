@@ -17,9 +17,6 @@ for more detailed instructions and examples.
 
 ## Install
 
-Either download [latest release](https://github.com/urld/passmgr/releases/latest),
-or build it yourself from source:
-```go get github.com/urld/passmgr/cmd/passmgr```
 Download the [latest release](https://github.com/urld/passmgr/releases/latest) for your platform,
 or build from source:
 ```go get github.com/urld/passmgr/cmd/passmgr```
