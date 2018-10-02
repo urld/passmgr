@@ -77,7 +77,7 @@ func (c *aesGcm) Decrypt(ciphertext []byte) ([]byte, error) {
 	copy(c.nonce, ciphertext[:nonceSize])
 
 	// decrypt:
-	return c.AEAD.Open(ciphertext[:0], c.nonce, ciphertext[nonceSize:], nil)
+	return c.AEAD.Open(nil, c.nonce, ciphertext[nonceSize:], nil)
 }
 
 func (c *aesGcm) incrementNonce() error {
