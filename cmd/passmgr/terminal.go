@@ -173,7 +173,7 @@ func (app *termApp) Get() bool {
 
 	println("")
 	println("Passphrase copied to clipboard!")
-	println("Clipboard will be erased in", app.clipboardTTL, "seconds.")
+	println("Clipboard will be erased in ", app.clipboardTTL, " seconds.")
 	println("")
 	setClipboard(passphrase)
 	defer resetClipboard()
