@@ -9,5 +9,3 @@ $MAKE test
 
 GOOS=linux GOARCH=amd64 $MAKE dist
 GOOS=windows GOARCH=amd64 $MAKE dist
-GOOS=darwin GOARCH=amd64 $MAKE dist
-
