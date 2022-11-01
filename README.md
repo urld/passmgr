@@ -1,6 +1,6 @@
 # passmgr
 
-[![Build Status](https://travis-ci.org/urld/passmgr.svg?branch=master)](https://travis-ci.org/urld/passmgr)
+[![Build Status](https://github.com/urld/passmgr/workflows/CI/badge.svg?event=push&branch=main)](https://github.com/urld/passmgr/actions?query=workflow%3ACI+event%3Apush+branch%3Amain)
 [![Go Report Card](https://goreportcard.com/badge/github.com/urld/passmgr)](https://goreportcard.com/report/github.com/urld/passmgr)
 [![GoDoc](https://godoc.org/github.com/urld/passmgr/cmd/passmgr?status.svg)](https://godoc.org/github.com/urld/passmgr/cmd/passmgr)
 
