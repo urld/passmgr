@@ -11,15 +11,15 @@ all: test install dist
 
 
 
-dist: build
+dist: build shrink
 	mkdir -p $(RELEASE_DIR)
-	mkdir -p $(BUILD_DIR)/licenses
-	cp $(GOPATH)/src/github.com/bgentry/speakeasy/LICENSE $(BUILD_DIR)/licenses/bgentry.speakeasy.LICENSE
-	cp $(GOPATH)/src/github.com/bgentry/speakeasy/LICENSE_WINDOWS $(BUILD_DIR)/licenses/bgentry.speakeasy.LICENSE_WINDOWS
-	cp $(GOPATH)/src/github.com/atotto/clipboard/LICENSE $(BUILD_DIR)/licenses/atotto.clipboard.LICENSE
-	cp $(GOPATH)/src/golang.org/x/crypto/LICENSE $(BUILD_DIR)/licenses/golang.crypto.LICENSE
+	go-licenses save "github.com/urld/passmgr/cmd/passmgr" --save_path="$(BUILD_DIR)/licenses"
 	cp LICENSE $(BUILD_DIR)/licenses/passmgr.LICENSE
 	tar -cvzf  $(RELEASE_DIR)/$(RELEASE_FILE).tar.gz $(BUILD_DIR) --transform='s/$(BUILD_DIR)/$(RELEASE_FILE)/g'
+
+shrink: build
+	strip $(BUILD_DIR)/passmgr*
+	upx $(BUILD_DIR)/passmgr*
 
 build: clean_build
 	mkdir -p $(BUILD_DIR)
@@ -30,7 +30,7 @@ test:
 	go test github.com/urld/passmgr/...
 
 
-install: test
+install:
 	go install github.com/urld/passmgr/cmd/passmgr
 
 
@@ -43,4 +43,3 @@ clean_build:
 
 clean_dist:
 	rm -rf $(RELEASE_DIR)
-
