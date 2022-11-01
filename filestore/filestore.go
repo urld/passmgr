@@ -10,7 +10,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"time"
 
@@ -78,8 +77,8 @@ func (s *fileStore) persist() error {
 	// write to temp file first and rename to actual target file
 	// to ensure write operation to be atomic, so the old file is not
 	// lost on errors during write.
-	tmpFileName := s.filename + string(time.Now().Unix())
-	err = ioutil.WriteFile(tmpFileName, content, os.FileMode(0600))
+	tmpFileName := s.filename + fmt.Sprint(time.Now().Unix())
+	err = os.WriteFile(tmpFileName, content, os.FileMode(0600))
 	if err != nil {
 		_ = os.Remove(tmpFileName)
 		return err
@@ -100,15 +99,15 @@ const (
 // The file starts with a magic number to identify the file format version.
 // Currently only the format 'passmgr1' is supported.
 //
-//    0      7 8                             39 40        51 52           n
-//   +--------+--------------------------------+------------+-----    -----+
-//   |passmgr1|              salt              |   nonce    |  ciphertext  |
-//   +--------+--------------------------------+------------+-----    -----+
+//	 0      7 8                             39 40        51 52           n
+//	+--------+--------------------------------+------------+-----    -----+
+//	|passmgr1|              salt              |   nonce    |  ciphertext  |
+//	+--------+--------------------------------+------------+-----    -----+
 //
-//   passmgr1:   70 61 73 73 6d 67 72 01
-//   salt:       32 byte salt for scrypt key derivation
-//   nonce:      12 byte random nonce for aes-gcm
-//   ciphertext: aes256-gcm encrypted json encoded content of Store
+//	passmgr1:   70 61 73 73 6d 67 72 01
+//	salt:       32 byte salt for scrypt key derivation
+//	nonce:      12 byte random nonce for aes-gcm
+//	ciphertext: aes256-gcm encrypted json encoded content of Store
 func Read(filename, passphrase string) (passmgr.Store, error) {
 	content, err := readSecretFile(filename)
 	if err != nil {
@@ -185,7 +184,7 @@ func readSecretFile(filename string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ioutil.ReadFile(filename)
+	return os.ReadFile(filename)
 }
 
 func unmarshalStore(content []byte) ([]passmgr.Subject, error) {
