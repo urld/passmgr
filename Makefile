@@ -11,7 +11,7 @@ all: test install dist
 
 
 
-dist: build shrink
+dist: build
 	mkdir -p $(RELEASE_DIR)
 	go-licenses save "github.com/urld/passmgr/cmd/passmgr" --save_path="$(BUILD_DIR)/licenses"
 	cp LICENSE $(BUILD_DIR)/licenses/passmgr.LICENSE
